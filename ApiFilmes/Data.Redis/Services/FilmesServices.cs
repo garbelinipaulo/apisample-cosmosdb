@@ -1,4 +1,5 @@
-﻿using Data.Redis.Repositorios;
+﻿using Data.Redis.Interfaces;
+using Data.Redis.Repositorios;
 
 namespace Data.Redis.Services
 {
@@ -9,7 +10,7 @@ namespace Data.Redis.Services
             repositorioFilmes = new RepositorioFilmes();
         }
 
-        public RepositorioFilmes repositorioFilmes { get; set; }
+        public IRepositorioFilmes repositorioFilmes { get; set; }
 
     }
 }

@@ -27,7 +27,7 @@ namespace Data.Redis.Repositorios
             using (var _redisClient = new RedisClient(xConn))
             {
                 try
-                { 
+                {
                     _retorno = _redisClient.Remove(Key);
                 }
                 catch (Exception ex)
@@ -40,11 +40,17 @@ namespace Data.Redis.Repositorios
         }
 
         public async Task<List<T>> GetAll()
-        { 
+        {
             List<T> list = new List<T>();
             using (var _redisClient = new RedisClient(xConn))
-            { 
-                var _retorno = _redisClient.GetAll<T>();
+            {
+                //visto que o método GetAll não está funcionando, precisei buscar as keys e depois pegar as infos.
+                var _listaKeys = _redisClient.GetAllKeys();
+                foreach (var item in _listaKeys)
+                {
+                    list.Add(_redisClient.Get<T>(item));
+                }
+
             }
 
             return await Task.FromResult(list);
@@ -54,7 +60,7 @@ namespace Data.Redis.Repositorios
         {
             T _retorno;
             using (var _redisClient = new RedisClient(xConn))
-            { 
+            {
                 _retorno = _redisClient.Get<T>(Key);
             }
 
@@ -65,20 +71,21 @@ namespace Data.Redis.Repositorios
         {
             T _retorno = obj;
             using (var _redisClient = new RedisClient(xConn))
-            { 
+            {
                 _redisClient.Set<T>(Key, obj);
-                _retorno = _redisClient.Get<T>(Key);    
+                _retorno = _redisClient.Get<T>(Key);
             }
 
             return await Task.FromResult(_retorno);
         }
 
-        public void SaveCollection(Dictionary<string,T> objs)
-        { 
+        public void SaveCollection(Dictionary<string, T> objs)
+        {
             using (var _redisClient = new RedisClient(xConn))
             {
-                _redisClient.SetAll<T>(objs); 
-            } 
+                _redisClient.RemoveAll(_redisClient.GetAllKeys());
+                _redisClient.SetAll<T>(objs);
+            }
         }
     }
 }

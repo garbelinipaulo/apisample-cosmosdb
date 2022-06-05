@@ -3,6 +3,7 @@ using Data.Redis.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Services.Rabbit;
 
 namespace ApiFilmes.Controllers
 {
@@ -29,19 +30,30 @@ namespace ApiFilmes.Controllers
                 _filmes = await _filmesServices.repositorioFilmes.GetAll();
             }
 
-            return Ok(_filmes);
+            return Accepted(_filmes);
         }
 
         [HttpGet("Get/{Key}")] 
         public async Task<IActionResult> Get(string Key)
         {
-            return Ok(await _filmesServices.repositorioFilmes.Get(Key));
-        }
+            var _retornoBusca = await _filmesServices.repositorioFilmes.Get(Key); 
+
+            //gerando info de busca de filmes para ser utilizado como consumo no método GetKeysConsumidas
+            QueueChannel.GerarQueue(nameof(FilmesController), $"{DateTime.Now} -> Key {_retornoBusca.idFilme} - Filme {_retornoBusca.xTitulo}"); 
+
+            return Accepted(_retornoBusca);
+        } 
 
         [HttpPost("Post")]
         public async Task<IActionResult> Post(FilmesModel obj)
         { 
-            return Ok(await _filmesServices.repositorioFilmes.Save(obj, obj.idFilme.ToString()));
+            return Accepted(await _filmesServices.repositorioFilmes.Save(obj, obj.idFilme.ToString()));
+        }
+
+        [HttpDelete("Delete/{Key}")]
+        public async Task<IActionResult> Delete(string Key)
+        {
+            return Accepted(await _filmesServices.repositorioFilmes.Excluir(Key));
         }
     }
 }

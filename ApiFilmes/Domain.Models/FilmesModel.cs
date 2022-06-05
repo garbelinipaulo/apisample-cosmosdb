@@ -27,7 +27,7 @@ namespace Domain.Models
 
         public FilmesModel()
         {
-            idFilme = new Guid();
+            idFilme = Guid.NewGuid();
         }
 
         /// <summary>
