@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain.Models", "Domain.Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.Rabbit", "Services.Rabbit\Services.Rabbit.csproj", "{619F2B85-175C-4706-9C22-21047DEAB16D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.RabbitConsumer", "Services.RabbitConsumer\Services.RabbitConsumer.csproj", "{CE946650-EE68-482D-B7C7-4A4DB943C65A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services.ConsoleRabbitConsumer", "Services.RabbitConsumer\Services.ConsoleRabbitConsumer.csproj", "{CE946650-EE68-482D-B7C7-4A4DB943C65A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
