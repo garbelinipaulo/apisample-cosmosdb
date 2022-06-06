@@ -3,7 +3,8 @@ using Data.Redis.Services;
 using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Services.Rabbit;
+using RabbitMQ.Client; 
+using System.Text;
 
 namespace ApiFilmes.Controllers
 {
@@ -11,6 +12,13 @@ namespace ApiFilmes.Controllers
     [ApiController]
     public class FilmesController : ControllerBase
     {
+#if Release
+        const string configHost = "connRemota";
+#else
+        const string configHost = "172.17.0.4"; //docker ip local
+#endif 
+
+
         private readonly ILogger<FilmesController> _logger;
         private FilmesServices _filmesServices = new FilmesServices();
         public FilmesController(ILogger<FilmesController> logger)
@@ -38,11 +46,22 @@ namespace ApiFilmes.Controllers
         {
             var _retornoBusca = await _filmesServices.repositorioFilmes.Get(Key); 
 
-            //gerando info de busca de filmes para ser utilizado como consumo no método GetKeysConsumidas
-            QueueChannel.GerarQueue(nameof(FilmesController), $"{DateTime.Now} -> Key {_retornoBusca.idFilme} - Filme {_retornoBusca.xTitulo}"); 
+
+            if(_retornoBusca != null)
+            { 
+                //gerando info de busca de filmes para ser utilizado como consumo no método GetKeysConsumidas
+                await GerarQueue(nameof(FilmesController), $"{DateTime.Now} -> Key {_retornoBusca.idFilme} - Filme {_retornoBusca.xTitulo}");
+            }
 
             return Accepted(_retornoBusca);
-        } 
+        }
+         
+        [HttpGet("GetFilmesBuscados")]
+        public async Task<IActionResult> GetFilmesBuscados()
+        {
+            return Accepted(await _filmesServices.repositorioFilmes.BuscaLogsGravados());
+        }
+
 
         [HttpPost("Post")]
         public async Task<IActionResult> Post(FilmesModel obj)
@@ -54,6 +73,40 @@ namespace ApiFilmes.Controllers
         public async Task<IActionResult> Delete(string Key)
         {
             return Accepted(await _filmesServices.repositorioFilmes.Excluir(Key));
+        }
+
+
+        [HttpDelete("LimparBanco")]
+        public async Task<IActionResult> LimparBanco()
+        {
+            return Accepted(await _filmesServices.repositorioFilmes.LimparBanco());
+        }
+
+
+        async Task GerarQueue(string xTipo, string Key)
+        {
+            var factory = new ConnectionFactory() { HostName = configHost };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: xTipo,
+                                     durable: false,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                var body = Encoding.UTF8.GetBytes(Key);
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: xTipo,
+                                     basicProperties: null,
+                                     body: body);
+
+
+
+                await Task.CompletedTask;
+            }
+
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Data.Redis.Repositorios
 #if Release
         const string xConn = "connRemota";
 #else
-        const string xConn = "localhost:6379";
+        const string xConn = "172.17.0.2:6379";
 #endif
 
         #endregion
@@ -32,6 +32,16 @@ namespace Data.Redis.Repositorios
             }
 
             return await Task.FromResult(_retorno);
+        }
+
+        public async Task<bool> LimparBanco()
+        { 
+            using (var _redisClient = new RedisClient(xConn))
+            {
+                _redisClient.RemoveAll(_redisClient.GetAllKeys());
+            }
+
+            return await Task.FromResult(true);
         }
 
         public async Task<List<T>> GetAll()
