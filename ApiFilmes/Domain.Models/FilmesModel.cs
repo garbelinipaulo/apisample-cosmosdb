@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,21 +9,25 @@ namespace Domain.Models
 {
     public class FilmesModel
     {
+        [JsonProperty(PropertyName = "idFilme")]
         public Guid idFilme { get; private set; }
 
         /// <summary>
         /// Título do filme
-        /// </summary>
+        /// </summary> 
+        [JsonProperty(PropertyName = "xTitulo")]
         public string xTitulo { get; set; }
 
         /// <summary>
         /// Média de avaliações
-        /// </summary>
+        /// </summary> 
+        [JsonProperty(PropertyName = "vMedia")]
         public decimal vMedia { get; set; }
 
         /// <summary>
         /// Categoria do filme
         /// </summary>
+        [JsonProperty(PropertyName = "xCategoria")]
         public string xCategoria { get; set; }
 
         public FilmesModel()
