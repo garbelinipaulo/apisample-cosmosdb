@@ -55,7 +55,12 @@ namespace ApiFilmes.Controllers
 
             return Accepted(_retornoBusca);
         }
-         
+       
+
+        /// <summary>
+        /// Buscado os logs de consumos da api de get utilizando mensageria e background services.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("GetFilmesBuscados")]
         public async Task<IActionResult> GetFilmesBuscados()
         {
